@@ -1,0 +1,2 @@
+gcc src/*.c -g -lncurses -o bin/mahou
+chmod +x bin/mahou
