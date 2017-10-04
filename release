@@ -1,2 +1,2 @@
-gcc src/*.c -lncurses -o bin/mahou
+gcc src/*.c src/server/*.c src/client/*.c -iquotesrc/ -lpthread -lncurses -o bin/mahou
 chmod +x bin/mahou

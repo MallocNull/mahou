@@ -14,6 +14,7 @@
 #include <errno.h>
 #include "common.h"
 
+#define SOCK_SUCCESS 0
 #define SOCK_ERR_GETADDRINFO -1
 #define SOCK_ERR_SOCKET -2
 #define SOCK_ERR_BIND -3

@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <ncurses.h>
 #include "sock.h"
+#include "screen.h"
+#include "ui.h"
 
 void client();
 
