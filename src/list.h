@@ -32,6 +32,8 @@ void list_insert(list_t*, void*, int);
 
 int list_size(list_t*);
 void* list_get(list_t*, int);
+void* list_front(list_t*);
+void* list_back(list_t*);
 int list_find(list_t*, void*);
 int list_func_find(list_t*, listfindfptr);
 
@@ -41,6 +43,7 @@ void* list_remove_back(list_t*);
 
 void list_iter_reset(list_t*);
 void* list_iter_next(list_t*);
+void* list_iter_get(list_t*);
 void* list_iter_remove(list_t*);
 void list_iter_insert_before(list_t*, void*);
 void list_iter_insert_after(list_t*, void*);

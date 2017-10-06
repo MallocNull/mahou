@@ -19,7 +19,7 @@ void* stack_pop(stack_t*);
 BOOL stack_can_pop(stack_t*);
 
 void stack_free(stack_t*);
-void stack_node_free(stack_t*);
-void stack_node_func_free(stack_t*, stackffptr); 
+void stack_nodes_free(stack_t*);
+void stack_nodes_func_free(stack_t*, stackffptr); 
 
 #endif

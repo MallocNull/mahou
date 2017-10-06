@@ -19,16 +19,15 @@ static list_node_t* list_node_init() {
 }
 
 static list_node_t* list_get_raw(list_t *list, int pos) {
+    if(pos >= list->size)
+        return NULL;
+
     int i = 0;
     list_node_t *ptr = list->front;
-    for(i = 0; i < pos; ++i) {
-        if(i == pos)
-            return ptr;
-
+    for(i = 0; i < pos; ++i)
         ptr = ptr->next;
-    }
 
-    return NULL;
+    return ptr;
 }
 
 static void list_add_first(list_t *list, void *data) {
@@ -37,6 +36,7 @@ static void list_add_first(list_t *list, void *data) {
 
     list->front = list->back = list_node_init();
     list->front->data = data;
+    list->size++;
 }
 
 void list_append(list_t *list, void *data) {
@@ -167,6 +167,13 @@ void* list_iter_next(list_t *list) {
 
     list->iter_pos++;
     return list->iterator == NULL ? NULL : list->iterator->data;
+}
+
+void* list_iter_get(list_t *list) {
+    if(list->iterator == NULL)
+        return NULL;
+
+    return list->iterator->data;
 }
 
 void* list_iter_remove(list_t *list) {

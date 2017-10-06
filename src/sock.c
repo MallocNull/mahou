@@ -83,9 +83,13 @@ int sock_start(socket_t *sock) {
 }
 
 void sock_set_timeout(socket_t *sock, int secs, int msecs) {
+    sock_set_timeout_us(sock, secs, msecs * 1000);
+}
+
+void sock_set_timeout_us(socket_t *sock, int secs, int usecs) {
     struct timeval timeout;
     timeout.tv_sec = secs;
-    timeout.tv_usec = msecs * 1000;
+    timeout.tv_usec = usecs;
 
     setsockopt(sock->socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout));
     setsockopt(sock->socket, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout));

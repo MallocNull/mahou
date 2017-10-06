@@ -40,7 +40,7 @@ void stack_free(stack_t *stack) {
     }
 }
 
-void stack_node_free(stack_t *stack) {
+void stack_nodes_free(stack_t *stack) {
     stack_t *ptr = stack, *next;
     while(ptr != NULL) {
         next = ptr->next;
@@ -52,7 +52,7 @@ void stack_node_free(stack_t *stack) {
     }
 }
 
-void stack_node_func_free(stack_t *stack, stackffptr ffptr) {
+void stack_nodes_func_free(stack_t *stack, stackffptr ffptr) {
     stack_t *ptr = stack, *next;
     while(ptr != NULL) {
         next = ptr->next;

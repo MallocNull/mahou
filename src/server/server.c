@@ -4,8 +4,8 @@ void server() {
     socket_t *sock = sock_server_init("6770");
     sock_start(sock);
 
-    sock_set_timeout(sock, 0, 1);
-
+    sock_set_timeout_us(sock, 0, 100);
+    
 
     printf("awaiting connection...\r\n");
     socket_t *conn = sock_accept(sock);
@@ -21,4 +21,5 @@ void server() {
     sock_stop(sock);
     sock_free(sock);
 }
+
 
