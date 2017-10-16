@@ -1,0 +1,30 @@
+PROTOCOL
+
+this is almost a carbon copy of every other tcp/ip protocol i write
+don't care enough to make it fancy
+
+packed values are msb
+
+byte n is b.sub n
+
+---
+
+byte the zero: packet id
+byte the one: region count
+for 0 <= n < b.sub 1
+    byte the byte after the last byte byte:
+        region length < 128: one byte
+        region length >= 128: two bytes, highest bit on msb always 1
+
+byte the bytes after the header octet bytes:
+    raw body data shoved next to each other with no separation
+
+---    
+   
+server -> client
+    
+
+---
+
+client -> server
+    

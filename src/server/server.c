@@ -6,7 +6,7 @@ void server() {
 
     sock_set_timeout_us(sock, 0, 100);
     
-
+    
     printf("awaiting connection...\r\n");
     socket_t *conn = sock_accept(sock);
 
@@ -21,5 +21,3 @@ void server() {
     sock_stop(sock);
     sock_free(sock);
 }
-
-

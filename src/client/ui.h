@@ -1,5 +1,5 @@
-#ifndef UI_H
-#define UI_H
+#ifndef CLIENT_UI_H
+#define CLIENT_UI_H
 
 #include <ncurses.h>
 #include <stdlib.h>

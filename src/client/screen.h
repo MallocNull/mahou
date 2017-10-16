@@ -1,5 +1,5 @@
-#ifndef SCREEN_H
-#define SCREEN_H
+#ifndef CLIENT_SCREEN_H
+#define CLIENT_SCREEN_H
 
 #include <ncurses.h>
 #include <stdlib.h>
