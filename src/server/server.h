@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "sock.h"
+#include "queue.h"
 
 void server();
 

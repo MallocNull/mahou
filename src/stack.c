@@ -31,6 +31,16 @@ BOOL stack_can_pop(stack_t *stack) {
     return stack->next != NULL;
 }
 
+int stack_depth(stack_t *stack) {
+    stack_t *ptr = stack;
+    int i;
+    
+    for(i = -1; ptr != NULL; ++i)
+        ptr = ptr->next;
+    
+    return i;
+}
+
 void stack_free(stack_t *stack) {
     stack_t *ptr = stack, *next;
     while(ptr != NULL) {

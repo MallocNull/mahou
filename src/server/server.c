@@ -1,6 +1,7 @@
 #include "server.h"
 
-void server() {
+void server() {    
+    server_context_start();
     socket_t *sock = sock_server_init("6770");
     sock_start(sock);
 
@@ -18,6 +19,7 @@ void server() {
     sock_recv(conn, in, 10);
     printf("got %s\r\n", in);
 
+    server_context_stop();
     sock_stop(sock);
     sock_free(sock);
 }
