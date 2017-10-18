@@ -5,14 +5,14 @@ static socket_t* sock_init() {
 }
 
 socket_t* sock_client_init(char *addr, char *port) {
-    socket_t* sock = sock_init();
+    socket_t *sock = sock_init();
     sock->type = SOCK_TYPE_CLIENT;
     sock->port = port;
     sock->addr = addr;
 }
 
 socket_t* sock_server_init(char *port) {
-    socket_t* sock = sock_init();
+    socket_t *sock = sock_init();
     sock->type = SOCK_TYPE_SERVER;
     sock->port = port;
 }

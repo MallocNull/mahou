@@ -3,28 +3,50 @@ PROTOCOL
 this is almost a carbon copy of every other tcp/ip protocol i write
 don't care enough to make it fancy
 
+all numbers are packed unless stated otherwise
 packed values are msb
 
-byte n is b.sub n
+byte n is b.n
+region n is r.n
 
 ---
 
 byte the zero: packet id
 byte the one: region count
-for 0 <= n < b.sub 1
-    byte the byte after the last byte byte:
-        region length < 128: one byte
+for 0 <= n < b.1
+    byte the byte after the previous byte byte:
+        region length <  128: one byte
         region length >= 128: two bytes, highest bit on msb always 1
 
-byte the bytes after the header octet bytes:
+byte the bytes after the header octet bytes bytes:
     raw body data shoved next to each other with no separation
 
 ---    
-   
-server -> client
-    
-
----
 
 client -> server
+    id 0: registration attempt
+        r.0 - username - string
+        r.1 - pin      - ushort (max 9999)
+       
+    id 1: login attempt
+        r.0 - username - string
+        r.1 - pin      - ushort (max 9999)
+       
+    id 2: ctx change response
+        r.0 - ack    - bool
+        r.1 - ctx id - ushort
     
+--- 
+   
+server -> client
+    id 0: registration response
+        r.0 - succeeded - bool
+        r.1 - status    - string
+    
+    id 1: login response
+        r.0 -  succeeded - bool
+        r.1 -> status    - string (if r.0 false)
+            -> user id   - ushort (if r.0 true)
+        
+    id 2: ctx change request
+        r.0 - ctx id - ushort
