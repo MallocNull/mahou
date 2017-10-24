@@ -7,4 +7,6 @@
 
 #define KEY_LF 10
 
+#define MAX_CONNS 100
+
 #endif

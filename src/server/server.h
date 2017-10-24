@@ -6,8 +6,6 @@
 #include "queue.h"
 #include "flimit.h"
 
-#define MAX_CONNS 100
-
 void server();
 
 #endif
