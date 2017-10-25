@@ -14,12 +14,14 @@ struct user_t {
     pthread_mutex_t mx_out_packets;
     
     socket_t *sock;
-    uint16_t context_id;
+    uint16_t user_id, context_id;
     uint16_t x, y;
 };
 
-void user_ctx_init();
+void user_context_init();
 
-void user_ctx_free();
+
+
+void user_context_free();
 
 #endif

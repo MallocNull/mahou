@@ -54,8 +54,7 @@ void stack_nodes_free(stack_t *stack) {
     stack_t *ptr = stack, *next;
     while(ptr != NULL) {
         next = ptr->next;
-        if(ptr->data != NULL)
-            free(ptr->data);
+        free(ptr->data);
 
         free(ptr);
         ptr = next;

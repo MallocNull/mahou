@@ -70,8 +70,7 @@ void queue_nodes_free(queue_t *queue) {
     queue_node_t *ptr = queue->front, *next;
     while(ptr != NULL) {
         next = ptr->next;
-        if(ptr->data != NULL)
-            free(ptr->data);
+        free(ptr->data);
         
         free(ptr);
         ptr = next;

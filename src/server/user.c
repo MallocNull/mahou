@@ -5,7 +5,7 @@ struct {
     user_t **users;
 } ctx;
 
-void user_ctx_init() {
+void user_context_init() {
     ctx.active_users = list_init();
     ctx.users = (user_t**)malloc(MAX_CONNS * sizeof(user_t*));
     
@@ -14,13 +14,12 @@ void user_ctx_init() {
         ctx.users[i] = NULL;
 }
 
-void user_ctx_free() {
+void user_context_free() {
     list_free(ctx.active_users);
     
     int i;
     for(i = 0; i < MAX_CONNS; ++i)
-        if(ctx.users[i] != NULL)
-            free(ctx.users[i]);
+        free(ctx.users[i]);
     
     free(ctx.users);
 }
