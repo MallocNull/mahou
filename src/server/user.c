@@ -3,7 +3,7 @@
 struct {
     list_t *active_users;
     user_t **users;
-} ctx;
+} static ctx;
 
 void user_context_init() {
     ctx.active_users = list_init();

@@ -3,6 +3,9 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include "list.h"
+#include "queue.h"
+#include "sock.h"
 #include "common.h"
 
 typedef struct user_t user_t;

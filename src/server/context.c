@@ -3,7 +3,7 @@
 struct {
     BOOL running;
     pthread_t thread;
-} ctx;
+} static ctx;
 
 void* server_context(void *params) {
     while(ctx.running == TRUE) {

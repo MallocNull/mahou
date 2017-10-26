@@ -4,7 +4,7 @@ struct {
     WINDOW *main_win;
     WINDOW *chat_win;
     WINDOW *info_win;
-} ctx;
+} static ctx;
 
 static void ui_draw_borders();
 

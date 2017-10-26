@@ -26,7 +26,7 @@ char MM_OPTIONS[MM_OPT_COUNT][MM_MAX_OPT_LEN + 1] = {
 
 struct {
     socket_t *sock;
-} client_ctx;
+} static ctx;
 
 static int main_menu();
 static void how_to_play();
@@ -36,10 +36,10 @@ static void client_loop();
 void client() {
     int selected, err;
     BOOL running = TRUE;
-    client_ctx.sock = sock_client_init("127.0.0.1", "6770");
+    ctx.sock = sock_client_init("127.0.0.1", "6770");
 
     printf("Connecting to server...\n");
-    err = sock_start(client_ctx.sock);
+    err = sock_start(ctx.sock);
     if(err != SOCK_SUCCESS) {
         printf("Connection failed, error %d.", err);
         getchar();
