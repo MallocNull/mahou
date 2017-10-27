@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include "list.h"
 #include "common.h"
 
@@ -28,6 +29,6 @@ void packet_context_init(uint8_t);
 void packet_context_register(uint8_t, uint8_t, uint8_t, ...);
 void packet_context_register_iter(uint8_t, uint8_t, uint8_t, uint8_t, ...);
 
-
+void packet_context_free();
 
 #endif
