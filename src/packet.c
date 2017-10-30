@@ -36,7 +36,7 @@ void packet_context_register(uint8_t direction, uint8_t id, uint8_t iter_pt, uin
     
     va_start(args, count);
     for(i = 0; i < count; ++i) {
-        uint16_t length = va_arg(args, uint16_t);
+        uint16_t length = va_arg(args, int);
         ptr[id].region_lengths[i] = length;
         ptr[id].length += length;
     }
@@ -44,9 +44,13 @@ void packet_context_register(uint8_t direction, uint8_t id, uint8_t iter_pt, uin
 }
 
 void packet_context_free() {
-    free(ctx.c2s.region_lengths);
+    int i;
+    
+    for(i = 0; i < ctx.count; ++i)
+        free(ctx.c2s[i].region_lengths);
     free(ctx.c2s);
     
-    free(ctx.s2c.region_lengths);
+    for(i = 0; i < ctx.count; ++i)
+        free(ctx.s2c[i].region_lengths);
     free(ctx.s2c);
 }
