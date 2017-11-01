@@ -24,6 +24,7 @@ struct packet_t {
     uint16_t region_count;
     uint16_t iterator;
     uint16_t next_append;
+    void *ctx;
 };
 
 void packet_context_init(uint8_t);
@@ -33,13 +34,15 @@ void packet_context_free();
 packet_t* packet_init_in(uint8_t*);
 packet_t* packet_init_out(uint8_t, uint16_t);
 
-uint8_t* packet_get        (packet_t*, uint8_t, int*);
-uint8_t  packet_get_uint8  (packet_t*, uint8_t);
-uint16_t packet_get_uint16 (packet_t*, uint8_t);
-uint32_t packet_get_uint32 (packet_t*, uint8_t);
-uint64_t packet_get_uint64 (packet_t*, uint8_t);
+uint8_t* packet_get        (packet_t*, uint16_t, int*);
+uint8_t  packet_get_uint8  (packet_t*, uint16_t);
+uint16_t packet_get_uint16 (packet_t*, uint16_t);
+uint32_t packet_get_uint32 (packet_t*, uint16_t);
+uint64_t packet_get_uint64 (packet_t*, uint16_t);
 uint8_t* packet_get_raw    (packet_t*, int*);
 
+BOOL     packet_iter_next       (packet_t*);
+BOOL     packet_iter_prev       (packet_t*);
 uint8_t* packet_iter_get        (packet_t*, int*);
 uint8_t  packet_iter_get_uint8  (packet_t*);
 uint16_t packet_iter_get_uint16 (packet_t*);

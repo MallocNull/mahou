@@ -3,8 +3,9 @@ PROTOCOL
 all numbers are packed unless stated otherwise
 packed values are msb
 
-strings are predefined sizes and are terminated at either
-the boundary of the region or the first NUL character (0x0)
+strings are predefined sizes and are terminated at the
+first NUL character (0x0). max string length is the region
+length minus one, for the required NUL.
 
 byte n is b.n
 region n is r.n
@@ -23,11 +24,11 @@ byte the bytes after the header octet bytes bytes:
 
 client -> server
     id 0: registration attempt
-        r.0 - username - string (max 8b)
+        r.0 - username - string (max 9b)
         r.1 - pin      - ushort (max 9999)
        
     id 1: login attempt
-        r.0 - username - string (max 8b)
+        r.0 - username - string (max 9b)
         r.1 - pin      - ushort (max 9999)
        
     id 2: ctx change response
@@ -39,12 +40,12 @@ client -> server
 server -> client
     id 0: registration response
         r.0 - succeeded - bool
-        r.1 - status    - string (max 16b)
+        r.1 - status    - string (17b)
     
     id 1: login response
-        r.0 - succeeded - bool
+        r.0 - succeeded - bool 
         r.1 - user id   - ushort
-        r.2 - status    - string (max 16b)
+        r.2 - status    - string (17b)
         
     id 2: ctx change request
         r.0 - ctx id - ushort
