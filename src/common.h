@@ -9,14 +9,15 @@
 #define TRUE 1
 #define BOOL char
 
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+
 #define KEY_LF 10
 
 #define MAX_CONNS 100
 
 uint64_t htonll(uint64_t);
 uint64_t ntohll(uint64_t);
-
-uint64_t unpack_bytes(const uint8_t*, uint8_t);
 
 #define SPAWN_UNDEF  0
 #define SPAWN_CLIENT 1

@@ -20,6 +20,7 @@ struct queue_t {
 
 queue_t* queue_init();
 
+void queue_push_front(queue_t*, void*);
 void queue_push(queue_t*, void*);
 void* queue_pop(queue_t*);
 BOOL queue_can_pop(queue_t*);

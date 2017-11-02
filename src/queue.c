@@ -16,6 +16,18 @@ static queue_node_t* queue_node_init() {
     return node;
 }
 
+void queue_push_front(queue_t *queue, void *data) {
+    queue_node_t *node = queue_node_init();
+    node->data = data;
+    
+    if(queue->front == NULL)
+        queue->front = queue->back = node;
+    else {
+        node->next = queue->front;
+        queue->front = node;
+    }
+}
+
 void queue_push(queue_t *queue, void *data) {
     queue_node_t *node = queue_node_init();
     node->data = data;

@@ -2,11 +2,11 @@
 
 typedef struct packet_ctx_t packet_ctx_t;
 struct packet_ctx_t {
-    uint8_t iter_start;
+    uint16_t iter_start;
     uint32_t iter_length;
     uint32_t pre_iter_length;
     
-    uint8_t region_count;
+    uint16_t region_count;
     uint16_t iter_count;
     uint16_t pre_iter_count;
     
@@ -23,6 +23,8 @@ struct {
     packet_ctx_t *out;
 } static ctx;
 
+static uint16_t packet_region_length_ctx(packet_ctx_t*, uint16_t);
+
 void packet_context_init(uint8_t count) {
     ctx.count = count;
     ctx.c2s = (packet_ctx_t*)malloc(count * sizeof(packet_ctx_t));
@@ -33,7 +35,7 @@ void packet_context_init(uint8_t count) {
     ctx.out = spawn_type == SPAWN_CLIENT ? ctx.c2s : ctx.s2c;
 }
 
-void packet_context_register(uint8_t direction, uint8_t id, uint8_t iter_pt, uint8_t count, ...) {
+void packet_context_register(uint8_t direction, uint8_t id, uint8_t iter_pt, uint16_t count, ...) {
     if(id > ctx.count)
         return;
     
@@ -83,10 +85,7 @@ static void packet_fill_regions(packet_t *packet, packet_ctx_t *ctx) {
     packet->regions = (uint8_t**)malloc(packet->region_count * sizeof(uint8_t*));
     for(i = 0; i < packet->region_count; ++i) {
         packet->regions[i] = ptr;
-        if(ctx->iter_start == 0 || i < ctx->iter_start)
-            ptr += packet->region_lengths[i];
-        else if(ctx->iter_start != 0)
-            ptr += packet->region_lengths[ctx->iter_start + ((i - ctx->iter_start) % ctx->iter_count)];
+        ptr += packet_region_length_ctx(ctx, i);
     }
 }
 
@@ -101,7 +100,7 @@ packet_t* packet_init_in(uint8_t *raw) {
     packet_t *packet       = (packet_t*)malloc(sizeof(packet_t));
     packet->ctx            = in;
     packet->id             = raw[2];
-    packet->iterator       = 0;
+    packet->iterator       = 0xFFFF;
     packet->next_append    = 0xFFFF;
     packet->raw            = raw;
     packet->length         = ntohl(*((uint32_t*)&raw[3]));
@@ -125,11 +124,11 @@ packet_t* packet_init_out(uint8_t id, uint16_t iterations) {
     packet->ctx            = out;
     packet->id             = id;
     packet->iterator       = 0xFFFF;
-    packet->next_append    = 0;
+    packet->next_append    = 0x0;
     packet->region_count   = regions;
     packet->region_lengths = out->region_lengths;
     packet->length         = out->pre_iter_length + out->iter_length * iterations;
-    packet->raw            = (uint8_t*)malloc(packet->length * sizeof(uint8_t));
+    packet->raw            = (uint8_t*)malloc((7 * packet->length) * sizeof(uint8_t));
     packet_fill_regions(packet, out);
     
     return packet;
@@ -139,44 +138,47 @@ uint8_t* packet_get(packet_t *packet, uint16_t region, int *size) {
     if(region >= packet->region_count)
         return NULL;
     
-    packet_ctx_t *ctx;
-    if(size != NULL) {
-        ctx = (packet_ctx_t*)packet->ctx;
-        if(region >= ctx->iter_start && ctx->iter_start != 0)
-            *size = packet->region_lengths[(region - ctx->iter_start) % ctx->iter_count];
-        else
-            *size = packet->region_lengths[region];
-    }
+    if(size != NULL)
+        *size = packet_region_length_ctx((packet_ctx_t*)packet->ctx, region);
+    
+    return packet->regions[region];
+}
+
+uint8_t* packet_get_string(packet_t *packet, uint16_t region, int *size) {
+    if(region >= packet->region_count)
+        return NULL;
+    
+    *size = strlen(packet->regions[region]);
     
     return packet->regions[region];
 }
 
 uint8_t packet_get_uint8(packet_t *packet, uint16_t region) {
     if(region >= packet->region_count)
-        return NULL;
+        return 0;
     
     return *((uint8_t*)packet->regions[region]);
 }
 
 uint16_t packet_get_uint16(packet_t *packet, uint16_t region) {
     if(region >= packet->region_count)
-        return NULL;
+        return 0;
     
-    return *((uint16_t*)packet->regions[region]);
+    return ntohs(*((uint16_t*)packet->regions[region]));
 }
 
 uint32_t packet_get_uint32(packet_t *packet, uint16_t region) {
     if(region >= packet->region_count)
-        return NULL;
+        return 0;
     
-    return *((uint32_t*)packet->regions[region]);
+    return ntohl(*((uint32_t*)packet->regions[region]));
 }
 
-uint64_t packet_get_uint64(packet_t *packet, uint64_t region) {
+uint64_t packet_get_uint64(packet_t *packet, uint16_t region) {
     if(region >= packet->region_count)
-        return NULL;
+        return 0;
     
-    return *((uint64_t*)packet->regions[region]);
+    return ntohll(*((uint64_t*)packet->regions[region]));
 }
 
 uint8_t* packet_get_raw(packet_t *packet, int *size) {
@@ -186,4 +188,124 @@ uint8_t* packet_get_raw(packet_t *packet, int *size) {
     return packet->raw;
 }
 
-uint16_t packet_region_length(uint64_t todo_finish_this, void *DO_IT
+void packet_iter_reset(packet_t* packet) {
+    packet->iterator = 0xFFFF;
+}
+
+BOOL packet_iter_next(packet_t *packet) {
+    if(packet->iterator + 1 < packet->region_count) {
+        ++packet->iterator;
+        return TRUE;
+    } else
+        return FALSE;
+}
+
+BOOL packet_iter_prev(packet_t *packet) {
+    if(packet->iterator == 0 || packet->iterator == 0xFFFF)
+        return FALSE;
+    else {
+        --packet->iterator;
+        return TRUE;
+    }
+}
+
+uint8_t* packet_iter_get(packet_t *packet, int *size) {
+    return packet_get(packet, packet->iterator, size);
+}
+
+uint8_t* packet_iter_get_string(packet_t *packet, int *size) {
+    return packet_get_string(packet, packet->iterator, size);
+}
+
+uint8_t packet_iter_get_uint8(packet_t *packet) {
+    return packet_get_uint8(packet, packet->iterator);
+}
+
+uint16_t packet_iter_get_uint16(packet_t *packet) {
+    return packet_get_uint16(packet, packet->iterator);
+}
+
+uint32_t packet_iter_get_uint32(packet_t *packet) {
+    return packet_get_uint32(packet, packet->iterator);
+}
+
+uint64_t packet_iter_get_uint64(packet_t *packet) {
+    return packet_get_uint64(packet, packet->iterator);
+}
+
+void packet_append(packet_t *packet, uint8_t *data, int size) {
+    uint32_t region_size = packet_region_length_ctx((packet_ctx_t*)packet->ctx, packet->next_append);
+    
+    memcpy(packet->regions[packet->next_append], data, MIN(size, region_size));
+    ++(packet->next_append);
+}
+
+void packet_append_string(packet_t *packet, uint8_t *str, int size) {
+    size = size == 0 ? strlen(str) : size;
+    uint32_t write_size = 
+        MIN(packet_region_length_ctx((packet_ctx_t*)packet->ctx, packet->next_append) - 1, size);
+        
+    memcpy(packet->regions[packet->next_append], str, write_size);
+    packet->regions[packet->next_append][write_size] = 0;
+    ++(packet->next_append);
+}
+
+void packet_append_uint8(packet_t *packet, uint8_t value) {
+    packet->regions[packet->next_append][0] = value;
+    ++(packet->next_append);
+}
+
+void packet_append_uint16(packet_t *packet, uint16_t value) {
+    value = htons(value);
+    memcpy(packet->regions[packet->next_append], &value, 2);
+    ++(packet->next_append);
+}
+
+void packet_append_uint32(packet_t *packet, uint32_t value) {
+    value = htonl(value);
+    memcpy(packet->regions[packet->next_append], &value, 4);
+    ++(packet->next_append);
+}
+
+void packet_append_uint64(packet_t *packet, uint64_t value) {
+    value = htonll(value);
+    memcpy(packet->regions[packet->next_append], &value, 8);
+    ++(packet->next_append);
+}
+    
+static uint16_t packet_region_length_ctx(packet_ctx_t *pctx, uint16_t region) {
+    if(region >= pctx->iter_start && pctx->iter_start != 0)
+        return pctx->region_lengths[(region - pctx->iter_start) % pctx->iter_count];
+    else
+        return pctx->region_lengths[region];
+}
+
+uint16_t packet_region_length(uint8_t id, uint8_t dir, uint16_t region) {
+    return packet_region_length_ctx(dir == PCK_IN ? ctx.in + id : ctx.out + id, region);
+}
+
+uint32_t packet_pre_iter_length(uint8_t id, uint8_t dir) {
+    packet_ctx_t *pctx = dir == PCK_IN ? ctx.in + id : ctx.out + id;
+    return pctx->pre_iter_length;
+}
+
+uint32_t packet_iter_length(uint8_t id, uint8_t dir) {
+    packet_ctx_t *pctx = dir == PCK_IN ? ctx.in + id : ctx.out + id;
+    return pctx->iter_length;
+}
+
+BOOL packet_is_length_valid(uint8_t id, uint8_t dir, uint32_t length) {
+    packet_ctx_t *pctx = dir == PCK_IN ? ctx.in + id : ctx.out + id;
+    if(length < pctx->pre_iter_length)
+        return FALSE;
+    
+    if(pctx->iter_start == 0)
+        return length == pctx->length;
+    else
+        return ((length - pctx->pre_iter_length) % pctx->iter_length) == 0;
+}
+
+void packet_free(packet_t *packet) {
+    free(packet->raw);
+    free(packet);
+}

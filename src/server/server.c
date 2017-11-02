@@ -8,8 +8,6 @@ void server() {
     sock_start(sock);
     sock_set_nonblocking(sock);
     
-    
-    
     flimit_t vsync;
     for(;;) {
         frame_limit_tick(&vsync);

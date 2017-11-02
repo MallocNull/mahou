@@ -2,6 +2,7 @@
 
 #define BANNER_WIDTH  57
 #define BANNER_HEIGHT 6
+#define AFTER_BANNER BANNER_HEIGHT + 6
 char BANNER[BANNER_HEIGHT][BANNER_WIDTH + 1] = {
     ".        :    :::.      ::   .:      ...      ...    :::",
     ";;,.    ;;;   ;;`;;    ,;;   ;;,  .;;;;;;;.   ;;     ;;;",
@@ -83,6 +84,12 @@ void client() {
     sock_free(sock);*/
 }
 
+static void draw_banner() {
+    int i;
+    for(i = 0; i < BANNER_HEIGHT; ++i)
+        mvprintw(3 + i, (COLS - BANNER_WIDTH) / 2, BANNER[i]);
+}
+
 static int main_menu() {
     BOOL polling = TRUE;
     int i, j, selected = 0, color, ch;
@@ -98,8 +105,7 @@ static int main_menu() {
     attron(COLOR_PAIR(1) | A_BOLD);
    
     scr_fill();
-    for(i = 0; i < BANNER_HEIGHT; ++i)
-        mvprintw(3 + i, (COLS - BANNER_WIDTH) / 2, BANNER[i]);
+    draw_banner();
 
     attroff(COLOR_PAIR(1) | A_BOLD);
 
@@ -108,7 +114,7 @@ static int main_menu() {
             color = selected == i ? 2 : 1;
 
             attron(COLOR_PAIR(color));
-            mvprintw(6 + BANNER_HEIGHT + i*2, (COLS - (MM_MAX_OPT_LEN + 2)) / 2, 
+            mvprintw(AFTER_BANNER + i*2, (COLS - (MM_MAX_OPT_LEN + 2)) / 2, 
                 "* %s", MM_OPTIONS[i]);
             attroff(COLOR_PAIR(color));
         }
@@ -119,10 +125,10 @@ static int main_menu() {
         ch = getch();
         switch(ch) {
             case KEY_UP:
-                selected = selected == 0 ? 0 : selected - 1;
+                selected = selected == 0 ? MM_OPT_COUNT - 1 : selected - 1;
                 break;
             case KEY_DOWN:
-                selected = selected == MM_OPT_COUNT - 1 ? MM_OPT_COUNT - 1 : selected + 1;
+                selected = selected == MM_OPT_COUNT - 1 ? 0 : selected + 1;
                 break;
             case KEY_LF:
             case KEY_ENTER:
@@ -146,7 +152,25 @@ void how_to_play() {
 }
 
 void create_account() {
+    clear();
+    noecho();
+    cbreak();
+    
+    init_pair(1, COLOR_WHITE, COLOR_BLUE);
+    init_pair(2, COLOR_BLACK, COLOR_CYAN);
 
+    attron(COLOR_PAIR(1) | A_BOLD);
+   
+    scr_fill();
+    draw_banner();
+    
+    move(0, 0);
+    
+    printw("%i %i %i ", KEY_BACKSPACE, KEY_BTAB, KEY_CTAB);
+    
+    int a = 0;
+    while(a != KEY_LF)
+        printw("%i ", (a = getch()));
 }
 
 void client_loop() {
