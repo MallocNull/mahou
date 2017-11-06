@@ -5,6 +5,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define WORK
+
 #define FALSE 0
 #define TRUE 1
 #define BOOL char
@@ -12,6 +14,8 @@
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
+#define KEY_BS 8
+#define KEY_TAB 9
 #define KEY_LF 10
 
 #define MAX_CONNS 100

@@ -2,7 +2,7 @@
 
 #define BANNER_WIDTH  57
 #define BANNER_HEIGHT 6
-#define AFTER_BANNER BANNER_HEIGHT + 6
+#define AFTER_BANNER BANNER_HEIGHT + 3
 char BANNER[BANNER_HEIGHT][BANNER_WIDTH + 1] = {
     ".        :    :::.      ::   .:      ...      ...    :::",
     ";;,.    ;;;   ;;`;;    ,;;   ;;,  .;;;;;;;.   ;;     ;;;",
@@ -31,6 +31,7 @@ struct {
 
 static int main_menu();
 static void how_to_play();
+static void login_prompt(char*, uint16_t*);
 static void create_account();
 static void client_loop();
 
@@ -47,6 +48,7 @@ void client() {
         return;
     }
 
+	setlocale(LC_ALL, "");
     initscr(); 
 
     start_color();
@@ -72,22 +74,15 @@ void client() {
     }
     
     endwin();
-    
-    /*char in[10];
-    sock_recv(sock, in, 10); 
-    printf("got %s\r\n", in);
-
-    sock_send(sock, "hello", 6);
-    printf("sent message");
-
-    sock_stop(sock);
-    sock_free(sock);*/
+	
+    sock_stop(ctx.sock);
+    sock_free(ctx.sock);
 }
 
 static void draw_banner() {
     int i;
     for(i = 0; i < BANNER_HEIGHT; ++i)
-        mvprintw(3 + i, (COLS - BANNER_WIDTH) / 2, BANNER[i]);
+        scr_center_write(BANNER[i], BANNER_WIDTH, 3 + i);
 }
 
 static int main_menu() {
@@ -96,10 +91,13 @@ static int main_menu() {
 
     clear();
     noecho();
-    //raw();
     cbreak();
 
+#ifdef WORK
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+#else
     init_pair(1, COLOR_WHITE, COLOR_BLUE);
+#endif
     init_pair(2, COLOR_BLACK, COLOR_CYAN);
 
     attron(COLOR_PAIR(1) | A_BOLD);
@@ -114,7 +112,7 @@ static int main_menu() {
             color = selected == i ? 2 : 1;
 
             attron(COLOR_PAIR(color));
-            mvprintw(AFTER_BANNER + i*2, (COLS - (MM_MAX_OPT_LEN + 2)) / 2, 
+            mvprintw(AFTER_BANNER + 3 + i*2, (COLS - (MM_MAX_OPT_LEN + 2)) / 2, 
                 "* %s", MM_OPTIONS[i]);
             attroff(COLOR_PAIR(color));
         }
@@ -152,21 +150,8 @@ void how_to_play() {
 }
 
 void create_account() {
-    clear();
-    noecho();
-    cbreak();
     
-    init_pair(1, COLOR_WHITE, COLOR_BLUE);
-    init_pair(2, COLOR_BLACK, COLOR_CYAN);
-
-    attron(COLOR_PAIR(1) | A_BOLD);
-   
-    scr_fill();
-    draw_banner();
-    
-    move(0, 0);
-    
-    printw("%i %i %i ", KEY_BACKSPACE, KEY_BTAB, KEY_CTAB);
+    scr_alert(20, "this prompt box is a test of prompt box is a test of prompt box is a test of prompt box is a test of prompt box is a test of");
     
     int a = 0;
     while(a != KEY_LF)
