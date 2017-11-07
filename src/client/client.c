@@ -52,6 +52,7 @@ void client() {
     initscr(); 
 
     start_color();
+    scr_ctx_init();
     keypad(stdscr, TRUE);
 
     while(running == TRUE) {
@@ -89,32 +90,35 @@ static int main_menu() {
     BOOL polling = TRUE;
     int i, j, selected = 0, color, ch;
 
-    clear();
+    erase();
     noecho();
     cbreak();
 
-#ifdef WORK
-    init_pair(1, COLOR_WHITE, COLOR_BLACK);
-#else
-    init_pair(1, COLOR_WHITE, COLOR_BLUE);
-#endif
-    init_pair(2, COLOR_BLACK, COLOR_CYAN);
-
-    attron(COLOR_PAIR(1) | A_BOLD);
+    #ifdef WORK
+    attron(SCR_PAIR(SCR_WHITE, SCR_BLACK) | A_BOLD);
+    #else
+    attron(SCR_PAIR(SCR_WHITE, SCR_BLUE) | A_BOLD);
+    #endif
    
     scr_fill();
     draw_banner();
 
-    attroff(COLOR_PAIR(1) | A_BOLD);
+    attroff(SCR_PAIR(SCR_WHITE, SCR_BLACK) | A_BOLD);
 
     while(polling == TRUE) {
         for(i = 0; i < MM_OPT_COUNT; ++i) {
-            color = selected == i ? 2 : 1;
+            color = selected == i 
+                ? SCR_PAIR(SCR_BLACK, SCR_CYAN) 
+                #ifdef WORK
+                : SCR_PAIR(SCR_WHITE, SCR_BLACK);
+                #else
+                : SCR_PAIR(SCR_WHITE, SCR_BLUE);
+                #endif
 
-            attron(COLOR_PAIR(color));
+            attron(color);
             mvprintw(AFTER_BANNER + 3 + i*2, (COLS - (MM_MAX_OPT_LEN + 2)) / 2, 
                 "* %s", MM_OPTIONS[i]);
-            attroff(COLOR_PAIR(color));
+            attroff(color);
         }
 
         refresh();
@@ -153,9 +157,9 @@ void create_account() {
     
     scr_alert(20, "this prompt box is a test of prompt box is a test of prompt box is a test of prompt box is a test of prompt box is a test of");
     
-    int a = 0;
+    /*int a = 0;
     while(a != KEY_LF)
-        printw("%i ", (a = getch()));
+        printw("%i ", (a = getch()));*/
 }
 
 void client_loop() {
