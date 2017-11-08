@@ -72,21 +72,43 @@ WINDOW* scr_win_box(int top, int left, int width, int height) {
     return win;
 }
 
-static int calculate_height(int width, int length) {
-    return (int)ceil((float)length / (float)width);
+static int calculate_height(int width, char *text) {
+    int len = strlen(text), lines = 0, line_width, line_len, char_width, i;
+    char *ptr, *cpy = (char*)malloc(len * sizeof(char));
+    strcpy(cpy, text);
+    
+    ptr = strtok(cpy, "\n");
+    while(ptr != NULL) {
+        line_width = 0;
+        line_len = strlen(ptr);
+        for(i = 0; i < line_len; ++i) {
+            if(ptr[i] & 0x80 == 0 && isprint(ptr[i])) {
+                char_width = 0;
+                ++line_width;
+            } else if(ptr[i] & 0xE0 == 0xC0) {
+                char_width = 1;
+                ++line_width;
+            } else if(ptr[i] & 0xF0 == 0xE0) {
+                char_width = 2;
+                ++line_width;
+            } else if(ptr[i] & 0xF8 == 0xF0) {
+                char_width = 3;
+                ++line_width;
+            } else if(ptr[i] & 0xC0 == 0x80) {
+                if(char_width > 0)
+                    --char_width;
+                else
+                    ++line_width;
+            }
+        }
+        
+        
+        
+        ptr = strtok(NULL, "\n");
+    }
+    
+    return lines;
 }
-
-/*static void init_prompt_pairs() {
-    #ifdef WORK
-    init_pair(1, COLOR_WHITE, COLOR_BLACK);
-    init_pair(2, COLOR_BLACK, COLOR_CYAN);
-    init_pair(3, COLOR_WHITE, COLOR_BLACK);
-    #else
-    init_pair(1, COLOR_WHITE, COLOR_BLUE);
-    init_pair(2, COLOR_BLACK, COLOR_CYAN);
-    init_pair(3, COLOR_WHITE, COLOR_BLACK);
-    #endif
-}*/
 
 void scr_alert(int width, char *text) {
     erase();
@@ -197,16 +219,16 @@ BOOL scr_prompt(int width, char *text) {
     }
     
     delwin(win);
+	return retval;
 }
 
-BOOL scr_prompt_string(int width, char *text, char *out, int outlen) {
+void scr_prompt_string(int width, char *text, char *out, int outlen) {
     erase();
     noecho();
     cbreak();
     
-    int ch, curlen = 0;
+    int ch, curlen = 0, i, origin;
     short pair;
-    BOOL retval = TRUE, loop = TRUE;
     WINDOW *win;
     int text_height = calculate_height(width, strlen(text));
     
@@ -230,37 +252,107 @@ BOOL scr_prompt_string(int width, char *text, char *out, int outlen) {
     wattroff(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
     
     out[0] = '\0';
+    for(;;) {
+		origin = (width - (outlen + 3)) / 2;
+        wmove(win, text_height + 1, origin);
+        
+        pair = SCR_PAIR(SCR_BLACK, SCR_CYAN);
+		
+        wattron(win, pair);
+        wprintw(win, "-> ");
+        
+        wattron(win, A_UNDERLINE);
+        wprintw(win, out);
+		for(i = curlen; i < outlen; ++i)
+			waddch(win, ' ');
+        wattroff(win, A_UNDERLINE);
+        wattroff(win, pair);
+        
+		//if(curlen < outlen)
+			wmove(win, text_height + 1, origin + 3 + curlen);
+		//else
+			//scr_hide_cursor();
+		
+        wrefresh(win);
+        ch = getch();
+		if(curlen < outlen && isprint(ch)) {
+			out[curlen] = ch;
+			out[curlen + 1] = '\0';
+			++curlen;
+		} else if(curlen != 0 && (ch == KEY_BS || ch == KEY_BACKSPACE)) {
+			--curlen;
+			out[curlen] = '\0';
+		} else if(ch == KEY_LF || ch == KEY_ENTER)
+			break;
+    }
+    
+    delwin(win);
+}
+
+int scr_prompt_options(int width, char *text, char **options, int optcount) {
+    erase();
+    noecho();
+    cbreak();
+    
+    int ch, selected = 0, i, origin, maxlen = 0;
+    short pair;
+    BOOL loop = TRUE;
+    WINDOW *win;
+    int text_height = calculate_height(width, strlen(text));
+    
+    #ifdef WORK
+    pair = SCR_PAIR(SCR_WHITE, SCR_BLACK);
+    #else
+    pair = SCR_PAIR(SCR_WHITE, SCR_BLUE);
+    #endif
+    
+    attron(pair);
+    scr_fill();
+    attron(pair);
+    
+    attron(SCR_PAIR(SCR_WHITE, SCR_BLACK));
+    win = scr_win_box(1, (COLS - (width + 2)) / 2, width + 2, text_height + 3 + optcount);
+    attroff(SCR_PAIR(SCR_WHITE, SCR_BLACK));
+    
+    wattron(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
+    wprintw(win, text);
+    wrefresh(win);
+    wattroff(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
+    
+    for(i = 0; i < optcount; ++i)
+        maxlen = MAX(maxlen, strlen(options[i]) + 3);
+    origin = (width - maxlen) / 2;
+    
     while(loop) {
-        wmove(win, text_height + 1, (width - (outlen + 3)) / 2);
+		origin = (width - (outlen + 3)) / 2;
+        wmove(win, text_height + 1, origin);
         
-        pair = retval == TRUE 
-            ? SCR_PAIR(SCR_BLACK, SCR_CYAN)
-            : SCR_PAIR(SCR_WHITE, SCR_BLACK);
+        for(i = 0; i < optcount; ++i) {
+            pair = i == selected ? SCR_PAIR(SCR_BLACK, SCR_CYAN)
+                                 : SCR_PAIR(SCR_WHITE, SCR_BLACK);
             
+            
+        }
+		
         wattron(win, pair);
-        wprintw(win, check);
+        wprintw(win, "-> ");
+        
+        wattron(win, A_UNDERLINE);
+        wprintw(win, out);
+		for(i = curlen; i < outlen; ++i)
+			waddch(win, ' ');
+        wattroff(win, A_UNDERLINE);
         wattroff(win, pair);
-        
-        wprintw(win, "  ");
-        
-        pair = retval == FALSE
-            ? SCR_PAIR(SCR_BLACK, SCR_CYAN)
-            : SCR_PAIR(SCR_WHITE, SCR_BLACK);
-        
-        wattron(win, pair);
-        wprintw(win, cross);
-        wattroff(win, pair);
-        
         wrefresh(win);
         
         scr_hide_cursor();
         ch = getch();
         switch(ch) {
-            case KEY_LEFT:
-                retval = TRUE;
+            case KEY_UP:
+                selected = selected == 0 ? optcount - 1 : selected - 1;
                 break;
-            case KEY_RIGHT:
-                retval = FALSE;
+            case KEY_DOWN:
+                selected = selected == optcount - 1 ? 0 : selected + 1;
                 break;
             case KEY_LF:
             case KEY_ENTER:
@@ -270,4 +362,5 @@ BOOL scr_prompt_string(int width, char *text, char *out, int outlen) {
     }
     
     delwin(win);
+    return selected;
 }

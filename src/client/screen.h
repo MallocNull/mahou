@@ -1,10 +1,12 @@
 #ifndef CLIENT_SCREEN_H
 #define CLIENT_SCREEN_H
 
+
 #include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 #include "common.h"
 
 #define SCR_BLACK   0
@@ -32,8 +34,7 @@ WINDOW* scr_win_box(int, int, int, int);
 
 void scr_alert(int, char*);
 BOOL scr_prompt(int, char*);
-BOOL scr_prompt_string(int, char*, char*, int);
-BOOL scr_prompt_int(int, char*, int*);
-BOOL scr_prompt_options(int, char*, char**, int, int*); 
+void scr_prompt_string(int, char*, char*, int);
+int scr_prompt_options(int, char*, char**, int); 
 
 #endif

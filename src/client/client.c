@@ -155,7 +155,8 @@ void how_to_play() {
 
 void create_account() {
     
-    scr_alert(20, "this prompt box is a test of prompt box is a test of prompt box is a test of prompt box is a test of prompt box is a test of");
+	char input[9];
+    scr_prompt_string(20, "this prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test", input, 8);
     
     /*int a = 0;
     while(a != KEY_LF)
