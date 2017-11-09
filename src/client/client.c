@@ -116,8 +116,8 @@ static int main_menu() {
                 #endif
 
             attron(color);
-            mvprintw(AFTER_BANNER + 3 + i*2, (COLS - (MM_MAX_OPT_LEN + 2)) / 2, 
-                "* %s", MM_OPTIONS[i]);
+            mvprintw(AFTER_BANNER + 3 + i*2, (COLS - (MM_MAX_OPT_LEN + 3)) / 2, 
+                "%s %s", selected == i ? "->" : " *", MM_OPTIONS[i]);
             attroff(color);
         }
 
@@ -155,9 +155,21 @@ void how_to_play() {
 
 void create_account() {
     
-	char input[9];
-    scr_prompt_string(20, "this prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test", input, 8);
+    int len;
+    packet_t *pck = packet_init_out(0, 0);
+    packet_append_uint8(pck, PCK_CLERIC_REG);
+    uint8_t *out = packet_get_raw(pck, &len);
     
+    sock_send(ctx.sock, out, len);
+    
+    packet_free(pck);
+    
+	char input[9];
+    //scr_prompt_string(20, "this prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test", input, 8);
+    
+	scr_prompt_voptions(40, "test of a prompt box of a prompt box of a prompt box of a prompt\n \nbox of a prompt box of a prompt box\n \nthis is a test of a prompt box", 3,
+		"testtesttesttesttesttesttest a", "test b", "test c");
+	
     /*int a = 0;
     while(a != KEY_LF)
         printw("%i ", (a = getch()));*/

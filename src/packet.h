@@ -14,9 +14,15 @@
 #define PCK_IN 0
 #define PCK_OUT 1
 
-#define PCK_ID_REGISTER     0
-#define PCK_ID_LOGIN        1
-#define PCK_ID_CHANGE_CTX   2
+#define PCK_CLERIC_REG   0
+#define PCK_CLERIC_LOGIN 1
+
+#define PCK_ID_CLERIC_REQ   0
+#define PCK_ID_ALERT        1
+#define PCK_ID_PROMPT_BOOL  2
+#define PCK_ID_PROMPT_STR   3
+#define PCK_ID_PROMPT_LIST  4
+#define PCK_ID_CHANGE_CTX   5
 
 typedef struct packet_t packet_t;
 struct packet_t {

@@ -116,7 +116,7 @@ packet_t* packet_init_out(uint8_t id, uint16_t iterations) {
         return NULL;
     
     packet_ctx_t *out = &(ctx.out[id]);
-    int regions = out->region_count;
+    uint32_t regions = out->region_count, length;
     if(out->iter_start != 0)
         regions = out->iter_start + (iterations * out->iter_count);
     
@@ -128,8 +128,14 @@ packet_t* packet_init_out(uint8_t id, uint16_t iterations) {
     packet->region_count   = regions;
     packet->region_lengths = out->region_lengths;
     packet->length         = out->pre_iter_length + out->iter_length * iterations;
-    packet->raw            = (uint8_t*)malloc((7 * packet->length) * sizeof(uint8_t));
+    packet->raw            = (uint8_t*)malloc((7 + packet->length) * sizeof(uint8_t));
     packet_fill_regions(packet, out);
+    
+    packet->raw[0] = 0xDE;
+    packet->raw[1] = 0xAD;
+    packet->raw[2] = id;
+    length = htonl(packet->length);
+    memcpy(packet->raw + 3, &length, 4);
     
     return packet;
 }

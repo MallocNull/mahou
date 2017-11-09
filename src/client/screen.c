@@ -73,28 +73,28 @@ WINDOW* scr_win_box(int top, int left, int width, int height) {
 }
 
 static int calculate_height(int width, char *text) {
-    int len = strlen(text), lines = 0, line_width, line_len, char_width, i;
+    int len = strlen(text), lines = 0, char_width = 0,
+		line_len, line_width, i;
     char *ptr, *cpy = (char*)malloc(len * sizeof(char));
     strcpy(cpy, text);
     
     ptr = strtok(cpy, "\n");
     while(ptr != NULL) {
         line_width = 0;
-        line_len = strlen(ptr);
-        for(i = 0; i < line_len; ++i) {
-            if(ptr[i] & 0x80 == 0 && isprint(ptr[i])) {
+        for(i = 0; ptr[i] != '\0'; ++i) {
+            if((ptr[i] & 0x80) == 0 && isprint(ptr[i])) {
                 char_width = 0;
                 ++line_width;
-            } else if(ptr[i] & 0xE0 == 0xC0) {
+            } else if((ptr[i] & 0xE0) == 0xC0) {
                 char_width = 1;
                 ++line_width;
-            } else if(ptr[i] & 0xF0 == 0xE0) {
+            } else if((ptr[i] & 0xF0) == 0xE0) {
                 char_width = 2;
                 ++line_width;
-            } else if(ptr[i] & 0xF8 == 0xF0) {
+            } else if((ptr[i] & 0xF8) == 0xF0) {
                 char_width = 3;
                 ++line_width;
-            } else if(ptr[i] & 0xC0 == 0x80) {
+            } else if((ptr[i] & 0xC0) == 0x80) {
                 if(char_width > 0)
                     --char_width;
                 else
@@ -102,11 +102,11 @@ static int calculate_height(int width, char *text) {
             }
         }
         
-        
-        
+        lines += MAX(1, (int)ceil((float)line_width / width));
         ptr = strtok(NULL, "\n");
     }
     
+	free(cpy);
     return lines;
 }
 
@@ -117,7 +117,7 @@ void scr_alert(int width, char *text) {
     
     short pair;
     WINDOW *win;
-    int text_height = calculate_height(width, strlen(text));
+    int text_height = calculate_height(width, text);
     
     #ifdef WORK
     pair = SCR_PAIR(SCR_WHITE, SCR_BLACK);
@@ -158,7 +158,7 @@ BOOL scr_prompt(int width, char *text) {
     char check[] = "[ \u2714 ]";
     char cross[] = "[ \u2718 ]";
     WINDOW *win;
-    int text_height = calculate_height(width, strlen(text));
+    int text_height = calculate_height(width, text);
     
     #ifdef WORK
     pair = SCR_PAIR(SCR_WHITE, SCR_BLACK);
@@ -230,7 +230,7 @@ void scr_prompt_string(int width, char *text, char *out, int outlen) {
     int ch, curlen = 0, i, origin;
     short pair;
     WINDOW *win;
-    int text_height = calculate_height(width, strlen(text));
+    int text_height = calculate_height(width, text);
     
     #ifdef WORK
     pair = SCR_PAIR(SCR_WHITE, SCR_BLACK);
@@ -268,10 +268,10 @@ void scr_prompt_string(int width, char *text, char *out, int outlen) {
         wattroff(win, A_UNDERLINE);
         wattroff(win, pair);
         
-		//if(curlen < outlen)
+		if(curlen < outlen)
 			wmove(win, text_height + 1, origin + 3 + curlen);
-		//else
-			//scr_hide_cursor();
+		else
+			scr_hide_cursor();
 		
         wrefresh(win);
         ch = getch();
@@ -298,7 +298,7 @@ int scr_prompt_options(int width, char *text, char **options, int optcount) {
     short pair;
     BOOL loop = TRUE;
     WINDOW *win;
-    int text_height = calculate_height(width, strlen(text));
+    int text_height = calculate_height(width, text);
     
     #ifdef WORK
     pair = SCR_PAIR(SCR_WHITE, SCR_BLACK);
@@ -320,31 +320,23 @@ int scr_prompt_options(int width, char *text, char **options, int optcount) {
     wattroff(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
     
     for(i = 0; i < optcount; ++i)
-        maxlen = MAX(maxlen, strlen(options[i]) + 3);
+        maxlen = MIN(width, MAX(maxlen, strlen(options[i]) + 3));
     origin = (width - maxlen) / 2;
     
     while(loop) {
-		origin = (width - (outlen + 3)) / 2;
-        wmove(win, text_height + 1, origin);
-        
         for(i = 0; i < optcount; ++i) {
             pair = i == selected ? SCR_PAIR(SCR_BLACK, SCR_CYAN)
                                  : SCR_PAIR(SCR_WHITE, SCR_BLACK);
             
-            
+			wmove(win, text_height + i + 1, origin);
+			wrefresh(win);
+			
+            wattron(win, pair);
+			wprintw(win, "%s %s", i == selected ? "->" : " *", options[i]);
+			wattroff(win, pair);
         }
 		
-        wattron(win, pair);
-        wprintw(win, "-> ");
-        
-        wattron(win, A_UNDERLINE);
-        wprintw(win, out);
-		for(i = curlen; i < outlen; ++i)
-			waddch(win, ' ');
-        wattroff(win, A_UNDERLINE);
-        wattroff(win, pair);
-        wrefresh(win);
-        
+		wrefresh(win);
         scr_hide_cursor();
         ch = getch();
         switch(ch) {
@@ -363,4 +355,19 @@ int scr_prompt_options(int width, char *text, char **options, int optcount) {
     
     delwin(win);
     return selected;
+}
+
+int scr_prompt_voptions(int width, char *text, int optcount, ...) {
+	int retval, i;
+	char **options = (char**)malloc(optcount * sizeof(char*));
+	
+	va_list args;
+	va_start(args, optcount);
+	for(i = 0; i < optcount; ++i)
+		options[i] = va_arg(args, char*);
+	va_end(args);
+	
+	retval = scr_prompt_options(width, text, options, optcount);
+	free(options);
+	return retval;
 }

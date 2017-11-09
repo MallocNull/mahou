@@ -82,17 +82,17 @@ int sock_start(socket_t *sock) {
         return sock_server_start(sock, &hints);
 }
 
-void sock_set_timeout(socket_t *sock, int secs, int msecs) {
-    sock_set_timeout_us(sock, secs, msecs * 1000);
+void sock_set_timeout(socket_t *sock, uint8_t dir, int secs, int msecs) {
+    sock_set_timeout_us(sock, dir, secs, msecs * 1000);
 }
 
-void sock_set_timeout_us(socket_t *sock, int secs, int usecs) {
+void sock_set_timeout_us(socket_t *sock, uint8_t dir, int secs, int usecs) {
     struct timeval timeout;
     timeout.tv_sec = secs;
     timeout.tv_usec = usecs;
 
-    setsockopt(sock->socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout));
-    setsockopt(sock->socket, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout));
+    setsockopt(sock->socket, SOL_SOCKET, dir == SOCK_DIR_SEND ? SO_SNDTIMEO : SO_RCVTIMEO, 
+        (char*)&timeout, sizeof(timeout));
 }
 
 void sock_set_blocking(socket_t *sock) {

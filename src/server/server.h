@@ -5,6 +5,7 @@
 #include "context.h"
 #include "user.h"
 #include "sock.h"
+#include "packet.h"
 #include "queue.h"
 #include "flimit.h"
 

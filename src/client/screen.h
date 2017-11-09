@@ -3,6 +3,7 @@
 
 
 #include <ncurses.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -36,5 +37,6 @@ void scr_alert(int, char*);
 BOOL scr_prompt(int, char*);
 void scr_prompt_string(int, char*, char*, int);
 int scr_prompt_options(int, char*, char**, int); 
+int scr_prompt_voptions(int, char*, int, ...);
 
 #endif

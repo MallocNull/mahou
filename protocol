@@ -23,29 +23,72 @@ byte the bytes after the header octet bytes bytes:
 ---    
 
 client -> server
-    id 0: registration attempt
-        r.0 - username - string (max 9b)
-        r.1 - pin      - ushort (max 9999)
+    id 0: clerical request
+        r.0 - clerical id - byte
        
-    id 1: login attempt
-        r.0 - username - string (max 9b)
-        r.1 - pin      - ushort (max 9999)
+    id 1: alert prompt response
+        r.0 - clerical id - byte
+        r.1 - prompt id   - byte
        
-    id 2: ctx change response
+    id 2: boolean prompt response
+        r.0 - clerical id - byte
+        r.1 - prompt id   - byte
+        r.2 - response    - bool
+        
+    id 3: string prompt response
+        r.0 - clerical id - byte
+        r.1 - prompt id   - byte
+        r.2 - response    - string (256b)
+        
+    id 4: list prompt response
+        r.0 - clerical id - byte
+        r.1 - prompt id   - byte
+        r.2 - response    - ushort
+       
+    id 5: ctx change response
         r.0 - ack    - bool
         r.1 - ctx id - ushort
     
 --- 
    
 server -> client
-    id 0: registration response
-        r.0 - succeeded - bool
-        r.1 - status    - string (17b)
+    id 0: clerical response
+        r.0 - clerical id - byte
+        r.1 - success     - bool
     
-    id 1: login response
-        r.0 - succeeded - bool 
-        r.1 - user id   - ushort
-        r.2 - status    - string (17b)
+    id 1: alert prompt
+        r.0 - clerical id  - byte
+        r.1 - prompt id    - byte
+        r.2 - prompt width - ushort
+        r.3 - text         - string (512b)
+    
+    id 2: boolean prompt
+        r.0 - clerical id  - byte
+        r.1 - prompt id    - byte
+        r.2 - prompt width - ushort
+        r.3 - text         - string (512b)
+    
+    id 3: string prompt
+        r.0 - clerical id  - byte
+        r.1 - prompt id    - byte
+        r.2 - prompt width - ushort
+        r.3 - text         - string (512b)
+        r.4 - strlen       - byte
+    
+    id 4: list prompt
+        r.0   - clerical id      - byte
+        r.1   - prompt id        - byte
+        r.2   - prompt width     - ushort
+        r.3   - text             - string (512b)
+        r.4   - option count - n - ushort
+        r.x | 4 < x <= 4+n 
+              - option text      - string (256b)
         
-    id 2: ctx change request
+    id 5: ctx change request
         r.0 - ctx id - ushort
+        
+---
+
+CLERICAL IDs
+    id 0: register
+    id 1: login

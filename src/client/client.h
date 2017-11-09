@@ -5,6 +5,7 @@
 #include <locale.h>
 #include <ncurses.h>
 #include "sock.h"
+#include "packet.h"
 #include "screen.h"
 #include "ui.h"
 
