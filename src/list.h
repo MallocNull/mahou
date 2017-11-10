@@ -40,6 +40,7 @@ int list_func_find(list_t*, listfindfptr);
 void* list_remove(list_t*, int);
 void* list_remove_front(list_t*);
 void* list_remove_back(list_t*);
+void* list_remove_item(list_t*, void*);
 
 void list_iter_reset(list_t*);
 void* list_iter_next(list_t*);

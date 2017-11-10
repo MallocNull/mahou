@@ -7,6 +7,8 @@
 
 #define WORK
 
+#define MAHOU_PORT "6770"
+
 #define FALSE 0
 #define TRUE 1
 #define BOOL char

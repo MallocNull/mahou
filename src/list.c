@@ -149,6 +149,12 @@ void* list_remove_back(list_t *list) {
     return list_remove(list, list->size - 1);
 }
 
+void list_remove_item(list_t *list, void *item) {
+    int pos;
+    if((pos = list_find(list, item)) != -1)
+        list_remove(list, pos);
+}
+
 void list_iter_reset(list_t *list) {
     list->iterator = NULL;
     list->iter_prev = NULL;

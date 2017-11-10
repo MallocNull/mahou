@@ -167,8 +167,8 @@ void create_account() {
 	char input[9];
     //scr_prompt_string(20, "this prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test", input, 8);
     
-	scr_prompt_voptions(40, "test of a prompt box of a prompt box of a prompt box of a prompt\n \nbox of a prompt box of a prompt box\n \nthis is a test of a prompt box", 3,
-		"testtesttesttesttesttesttest a", "test b", "test c");
+	scr_prompt_voptions(30, "I'm glad you know which way to go, but that ain't gunna stop me, here we go!\n \nCheck and turn the signals to the left.\n \nNow turn to the left.", 3,
+		"Now turn to the left!", "Now turn to the right!", "Uh oh");
 	
     /*int a = 0;
     while(a != KEY_LF)

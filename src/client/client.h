@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <locale.h>
 #include <ncurses.h>
+#include "common.h"
 #include "sock.h"
 #include "packet.h"
 #include "screen.h"
