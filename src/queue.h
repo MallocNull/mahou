@@ -18,7 +18,7 @@ struct queue_t {
     queue_node_t *back;
 };
 
-queue_t* queue_init();
+queue_t* queue_init(void);
 
 void queue_push_front(queue_t*, void*);
 void queue_push(queue_t*, void*);

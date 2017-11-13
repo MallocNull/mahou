@@ -25,7 +25,10 @@ void server() {
                 running = FALSE;
                 break;
             } else {
-                
+                if(user_context_add(conn) == FALSE) {
+                    sock_stop(conn);
+                    sock_free(conn);
+                }
             }
         }
         

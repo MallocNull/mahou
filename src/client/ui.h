@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-void ui_init();
+void ui_init(void);
 
 
-void ui_free();
+void ui_free(void);
 
 #endif

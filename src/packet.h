@@ -39,7 +39,7 @@ struct packet_t {
 
 void packet_context_init(uint8_t);
 void packet_context_register(uint8_t, uint8_t, uint8_t, uint16_t, ...);
-void packet_context_free();
+void packet_context_free(void);
 
 packet_t* packet_init_in(uint8_t*);
 packet_t* packet_init_out(uint8_t, uint16_t);

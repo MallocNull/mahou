@@ -22,12 +22,12 @@
 #define SCR_PAIR(X, Y) COLOR_PAIR(__SCR_PAIRS[X][Y])
 
 short __SCR_PAIRS[8][8];
-void scr_ctx_init();
+void scr_ctx_init(void);
 
-void scr_fill();
+void scr_fill(void);
 void scr_char_fill(char);
 void scr_wchar_fill(wchar_t);
-void scr_hide_cursor();
+void scr_hide_cursor(void);
 void scr_center_write(char*, int, int);
 
 void scr_box(int, int, int, int);

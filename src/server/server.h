@@ -9,6 +9,6 @@
 #include "queue.h"
 #include "flimit.h"
 
-void server();
+void server(void);
 
 #endif

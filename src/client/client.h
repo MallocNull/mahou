@@ -10,6 +10,6 @@
 #include "screen.h"
 #include "ui.h"
 
-void client();
+void client(void);
 
 #endif

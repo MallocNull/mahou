@@ -12,7 +12,7 @@ struct stack_t {
     void *data;
 };
 
-stack_t* stack_init();
+stack_t* stack_init(void);
 
 void stack_push(stack_t*, void*);
 void* stack_pop(stack_t*);

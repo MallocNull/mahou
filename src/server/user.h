@@ -7,6 +7,7 @@
 #include "list.h"
 #include "queue.h"
 #include "sock.h"
+#include "packet.h"
 #include "common.h"
 
 #define USER_FLAG_LOGGED    1
@@ -25,12 +26,12 @@ struct user_t {
     uint16_t x, y;
 };
 
-void user_context_init();
-void user_context_add(user_t*);
+void user_context_init(void);
+BOOL user_context_add(socket_t*);
 void user_context_remove(user_t*);
-void user_context_free();
+void user_context_free(void);
 
-user_t* user_init(socket_t*);
+user_t* user_init(socket_t*, uint16_t);
 BOOL user_check_flag(user_t*, uint64_t);
 void user_free(user_t*);
 

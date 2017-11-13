@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include "common.h"
 
-void server_context_start();
-void server_context_stop();
+void server_context_start(void);
+void server_context_stop(void);
 
 #endif

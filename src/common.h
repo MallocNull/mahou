@@ -29,6 +29,6 @@ uint64_t ntohll(uint64_t);
 #define SPAWN_CLIENT 1
 #define SPAWN_SERVER 2
 void register_spawn_type(uint8_t);
-uint8_t get_spawn_type();
+uint8_t get_spawn_type(void);
 
 #endif
