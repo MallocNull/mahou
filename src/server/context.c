@@ -6,8 +6,11 @@ struct {
 } static ctx;
 
 void* server_context(void *params) {
+    flimit_t vsync;
     while(ctx.running == TRUE) {
+        frame_limit_tick(&vsync);
         
+        frame_limit_wait(&vsync, 60);
     }
     
     return NULL;

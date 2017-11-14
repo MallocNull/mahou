@@ -1,12 +1,21 @@
 #include "user.h"
 
+const char* _SKILL_NAMES[] = {
+    "Bare-Handed",
+    "Melee",
+    "Ranged",
+    "White Magic",
+    "Black Magic",
+    "Firemaking"
+};
+
 struct {
     pthread_mutex_t mx_ctx;
     list_t *active_users;
     user_t **users;
 } static ctx;
 
-BOOL user_check_flag_nomx(user_t *user, uint64_t flag);
+static BOOL user_check_flag_nomx(user_t *user, uint64_t flag);
 
 void user_context_init() {
     pthread_mutex_init(&ctx.mx_ctx, NULL);
@@ -37,9 +46,10 @@ BOOL user_context_add(socket_t *sock) {
 }
 
 void user_context_remove(user_t *user) {
-    pthread_mutex_lock(&ctx.mx_ctx);
-    if(user_check_flag(user, USER_FLAG_DELETING))
+    if(user_check_flag_nomx(user, USER_FLAG_DELETING))
         return;
+    
+    pthread_mutex_lock(&ctx.mx_ctx);
     
     pthread_mutex_lock(&user->mx_user);
     user->flags |= USER_FLAG_DELETING;
@@ -80,9 +90,8 @@ BOOL user_check_flag_nomx(user_t *user, uint64_t flag) {
     
 
 BOOL user_check_flag(user_t *user, uint64_t flag) {
-    BOOL retval;
     pthread_mutex_lock(&user->mx_user);
-	retval = user_check_flag_nomx(user, flag);
+	BOOL retval = user_check_flag_nomx(user, flag);
     pthread_mutex_unlock(&user->mx_user);
     return retval;
 }

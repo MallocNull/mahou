@@ -1,7 +1,7 @@
 #include "common.h"
-#include "packet.h"
 #include "client/client.h"
 #include "server/server.h"
+#include "net/packet.h"
 
 int main(int argc, char **argv) {
 	uint8_t spawn_type = 

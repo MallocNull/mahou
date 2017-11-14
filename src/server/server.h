@@ -2,12 +2,12 @@
 #define SERVER_H
 
 #include <stdio.h>
+#include "net/sock.h"
+#include "net/packet.h"
+#include "types/queue.h"
+#include "etc/flimit.h"
 #include "context.h"
 #include "user.h"
-#include "sock.h"
-#include "packet.h"
-#include "queue.h"
-#include "flimit.h"
 
 void server(void);
 

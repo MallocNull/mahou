@@ -5,8 +5,8 @@
 #include <locale.h>
 #include <ncurses.h>
 #include "common.h"
-#include "sock.h"
-#include "packet.h"
+#include "net/sock.h"
+#include "net/packet.h"
 #include "screen.h"
 #include "ui.h"
 

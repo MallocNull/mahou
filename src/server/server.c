@@ -7,7 +7,7 @@ void server() {
     user_context_init();
     server_context_start();
     
-    socket_t *sock = sock_server_init("6770");
+    socket_t *sock = sock_server_init(MAHOU_PORT);
     sock_start(sock);
     sock_set_nonblocking(sock);
     

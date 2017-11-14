@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include "common.h"
+#include "etc/flimit.h"
 
 void server_context_start(void);
 void server_context_stop(void);

@@ -38,7 +38,7 @@ static void client_loop();
 void client() {
     int selected, err;
     BOOL running = TRUE;
-    ctx.sock = sock_client_init("127.0.0.1", "6770");
+    ctx.sock = sock_client_init("127.0.0.1", MAHOU_PORT);
 
     printf("Connecting to server...\n");
     err = sock_start(ctx.sock);
