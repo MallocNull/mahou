@@ -1,25 +1,48 @@
 #include "user.h"
 
 const char* _SKILL_NAMES[] = {
-    "Bare-Handed",
     "Melee",
     "Ranged",
     "White Magic",
     "Black Magic",
-    "Firemaking"
+    "Woodcutting",
+    "Firemaking",
+    "Mining",
+    "Smithing",
+    "Fishing",
+    "Cooking"
 };
+
+const char* _SKILL_NAMES_SHORT[] = {
+    "MELE",
+    "RANG",
+    "WMAG",
+    "BMAG",
+    "WCUT",
+    "FIRE",
+    "MINE",
+    "SMTH",
+    "FISH",
+    "COOK"
+};
+
+const char * OFINISH THESE GI
 
 struct {
     pthread_mutex_t mx_ctx;
     list_t *active_users;
+    list_t *pending_removals;
     user_t **users;
 } static ctx;
 
+static user_t* user_init(socket_t*, uint16_t);
 static BOOL user_check_flag_nomx(user_t *user, uint64_t flag);
+static void user_free(user_t*);
 
 void user_context_init() {
     pthread_mutex_init(&ctx.mx_ctx, NULL);
     ctx.active_users = list_init();
+    ctx.pending_removals = list_init();
     ctx.users = (user_t**)malloc(MAX_CONNS * sizeof(user_t*));
     
     int i;
@@ -46,16 +69,30 @@ BOOL user_context_add(socket_t *sock) {
 }
 
 void user_context_remove(user_t *user) {
-    if(user_check_flag_nomx(user, USER_FLAG_DELETING))
-        return;
-    
     pthread_mutex_lock(&ctx.mx_ctx);
     
-    pthread_mutex_lock(&user->mx_user);
-    user->flags |= USER_FLAG_DELETING;
+    if(list_find(ctx.pending_removals, user) == -1)
+        list_append(ctx.pending_removals, user);
+    
+    pthread_mutex_unlock(&ctx.mx_ctx);
+    
     list_remove_item(ctx.active_users, user);
     ctx.users[user->user_id] = NULL;
     user_free(user);
+    
+}
+
+void user_context_purge() {
+    pthread_mutex_lock(&ctx.mx_ctx);
+    
+    user_t *ptr;
+    list_iter_reset(ctx.pending_removals);
+    while((ptr = list_iter_next(ctx.pending_removals)) != NULL) {
+        list_remove_item(ctx.active_users, user);
+        ctx.users[user->user_id] = NULL;
+        user_free(user);
+        list_iter_remove(ctx.pending_removals);
+    }
     
     pthread_mutex_unlock(&ctx.mx_ctx);
 }
@@ -71,12 +108,12 @@ void user_context_free() {
     free(ctx.users);
 }
 
-user_t* user_init(socket_t *sock, uint16_t user_id) {
+static user_t* user_init(socket_t *sock, uint16_t user_id) {
     user_t *user = (user_t*)malloc(sizeof(user_t));
     pthread_mutex_init(&user->mx_user, NULL);
 	user->user_id = user_id;
 	user->sock = sock;
-    user->flags = 0;
+    user->logged_in = FALSE;
 	
 	user->in_packets = queue_init();
 	user->out_packets = queue_init();
@@ -85,10 +122,9 @@ user_t* user_init(socket_t *sock, uint16_t user_id) {
 }
 
 BOOL user_check_flag_nomx(user_t *user, uint64_t flag) {
-    return (user->flags & flag) != 0;
+    return (user->data.flags & flag) != 0;
 }
     
-
 BOOL user_check_flag(user_t *user, uint64_t flag) {
     pthread_mutex_lock(&user->mx_user);
 	BOOL retval = user_check_flag_nomx(user, flag);
@@ -96,10 +132,17 @@ BOOL user_check_flag(user_t *user, uint64_t flag) {
     return retval;
 }
 
-void user_free(user_t *user) {
+void user_push_in_packet(user_t *user) {
+    pthread_mutex_lock(&user->mx_user);
+    
+    pthread_mutex_unlock(&user->mx_user);
+}
+
+static void user_free(user_t *user) {
     if(user == NULL) 
         return;
     
+    pthread_mutex_lock(&user->mx_user);
     packet_t *pck = NULL;
     
     while((pck = (packet_t*)queue_pop(user->in_packets)) != NULL)
