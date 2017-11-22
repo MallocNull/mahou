@@ -16,9 +16,10 @@
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
-#define KEY_BS 8
-#define KEY_TAB 9
-#define KEY_LF 10
+#define KEY_CC   3  
+#define KEY_BS   8
+#define KEY_TAB  9
+#define KEY_LF  10
 
 #define MAX_CONNS 100
 

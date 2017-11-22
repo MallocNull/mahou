@@ -12,10 +12,10 @@ region n is r.n
 
 ---
 
-byte the zero: 0xDE
-byte the one: 0xAD
-byte the two: packet id
-byte the 3-6: total body length - uint
+b.  0: 0xDE
+b.  1: 0xAD
+b.  2: packet id
+b.3-6: total body length - uint
 
 byte the bytes after the header octet bytes bytes:
     raw body data shoved next to each other with no separation
@@ -25,6 +25,9 @@ byte the bytes after the header octet bytes bytes:
 client -> server
     id 0: clerical request
         r.0 - clerical id - byte
+		r.1 - action      - byte
+            | start       - 0
+            | stop        - 1
        
     id 1: alert prompt response
         r.0 - clerical id - byte

@@ -15,7 +15,7 @@
   #define USER_GENDER_FEMALE  1
 #define USER_FLAG_POISONED  2
 
-#define SKILLS_COUNT   5
+#define SKILLS_COUNT   10
 #define SKILL_MELEE     0
 #define SKILL_RANGED    1
 #define SKILL_WHMAGIC   2
@@ -35,7 +35,7 @@
 #define STAT_INTELLECT  4
 #define STAT_WISDOM     5
 #define STAT_CHARISMA   6
-#define STAT_
+#define STAT_PERCEPT    7
 #define STAT_LUCK       8
 
 extern const char* _SKILL_NAMES[];
@@ -73,8 +73,8 @@ void user_context_purge(void);
 void user_context_free(void);
 
 BOOL user_check_flag(user_t*, uint64_t);
-void user_push_in_packet(user_t*);
-void user_push_out_packet(user_t*);
+void user_push_in_packet(user_t*, packet_t*);
+void user_push_out_packet(user_t*, packet_t*);
 packet_t* user_pop_in_packet(user_t*);
 packet_t* user_pop_out_packet(user_t*);
 

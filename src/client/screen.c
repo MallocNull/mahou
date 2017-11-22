@@ -1,5 +1,9 @@
 #include "screen.h"
 
+struct {
+    uint8_t loading_progress;
+} static ctx;
+
 void scr_ctx_init() {
     short i, j, val;
     short colors[] = {COLOR_BLACK, COLOR_BLUE,    COLOR_GREEN,  COLOR_CYAN,
@@ -110,10 +114,45 @@ static int calculate_height(int width, char *text) {
     return lines;
 }
 
+void scr_loading(int width, char *text) {
+    erase();
+    
+    WINDOW *win;
+    int text_height = calculate_height(width, text);
+    
+    #ifdef WORK
+    pair = SCR_PAIR(SCR_WHITE, SCR_BLACK);
+    #else
+    pair = SCR_PAIR(SCR_WHITE, SCR_BLUE);
+    #endif
+    
+    attron(pair);
+    scr_fill();
+    attron(pair);
+    
+    attron(SCR_PAIR(SCR_WHITE, SCR_BLACK));
+    win = scr_win_box(1, (COLS - (width + 2)) / 2, width + 2, text_height + 2);
+    attron(SCR_PAIR(SCR_WHITE, SCR_BLACK));
+    
+    wattron(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
+    wprintw(win, text);
+    wattroff(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
+    
+    delwin(win);
+    scr_hide_cursor();
+}
+
+void scr_loading_bar(int width, char *text) {
+    erase();
+    ctx.loading_progress = 0;
+    
+    
+}
+
 void scr_alert(int width, char *text) {
     erase();
     noecho();
-    cbreak();
+    raw();
     
     short pair;
     WINDOW *win;
@@ -147,14 +186,14 @@ void scr_alert(int width, char *text) {
     delwin(win);
 }
 
-BOOL scr_prompt(int width, char *text) {
+BOOL scr_prompt(BOOL cancelable, int width, char *text) {
     erase();
     noecho();
-    cbreak();
+    raw();
     
     int ch;
     short pair;
-    BOOL retval = TRUE, loop = TRUE;
+    BOOL retval = TRUE, loop = TRUE, canceled = FALSE;
     char check[] = "[ \u2714 ]";
     char cross[] = "[ \u2718 ]";
     WINDOW *win;
@@ -171,13 +210,25 @@ BOOL scr_prompt(int width, char *text) {
     attron(pair);
     
     attron(SCR_PAIR(SCR_WHITE, SCR_BLACK));
-    win = scr_win_box(1, (COLS - (width + 2)) / 2, width + 2, text_height + 4);
+    win = scr_win_box(1, (COLS - (width + 2)) / 2, width + 2, text_height + 5);
     attron(SCR_PAIR(SCR_WHITE, SCR_BLACK));
     
     wattron(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
     wprintw(win, text);
     wrefresh(win);
     wattroff(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
+    
+    #ifdef WORK
+    pair = SCR_PAIR(SCR_WHITE, SCR_BLACK);
+    #else
+    pair = SCR_PAIR(SCR_WHITE, SCR_BLUE);
+    #endif
+    
+    if(cancelable) {
+        attron(SCR_PAIR(SCR_BLACK, SCR_WHITE));
+        scr_center_write("PRESS ^C TO CANCEL", 0, text_height + 5);
+        attroff(SCR_PAIR(SCR_BLACK, SCR_WHITE));
+    }
     
     while(loop) {
         wmove(win, text_height + 1, (width - 12) / 2);
@@ -204,6 +255,7 @@ BOOL scr_prompt(int width, char *text) {
         
         scr_hide_cursor();
         ch = getch();
+        printw("%i", ch);
         switch(ch) {
             case KEY_LEFT:
                 retval = TRUE;
@@ -215,19 +267,24 @@ BOOL scr_prompt(int width, char *text) {
             case KEY_ENTER:
                 loop = FALSE;
                 break;
+            case KEY_CC:
+                if(cancelable)
+                    loop = !(canceled = TRUE);
+                break;
         }
     }
     
     delwin(win);
-	return retval;
+	return canceled ? -1 : retval;
 }
 
-void scr_prompt_string(int width, char *text, char *out, int outlen) {
+int scr_prompt_string(BOOL cancelable, int width, char *text, char *out, int outlen) {
     erase();
     noecho();
-    cbreak();
+    raw();
     
     int ch, curlen = 0, i, origin;
+    BOOL canceled = FALSE;
     short pair;
     WINDOW *win;
     int text_height = calculate_height(width, text);
@@ -243,13 +300,19 @@ void scr_prompt_string(int width, char *text, char *out, int outlen) {
     attron(pair);
     
     attron(SCR_PAIR(SCR_WHITE, SCR_BLACK));
-    win = scr_win_box(1, (COLS - (width + 2)) / 2, width + 2, text_height + 4);
+    win = scr_win_box(1, (COLS - (width + 2)) / 2, width + 2, text_height + 5);
     attroff(SCR_PAIR(SCR_WHITE, SCR_BLACK));
     
     wattron(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
     wprintw(win, text);
     wrefresh(win);
     wattroff(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
+    
+    if(cancelable) {
+        attron(SCR_PAIR(SCR_BLACK, SCR_WHITE));
+        scr_center_write("PRESS ^C TO CANCEL", 0, text_height + 5);
+        attroff(SCR_PAIR(SCR_BLACK, SCR_WHITE));
+    }
     
     out[0] = '\0';
     for(;;) {
@@ -284,19 +347,24 @@ void scr_prompt_string(int width, char *text, char *out, int outlen) {
 			out[curlen] = '\0';
 		} else if(ch == KEY_LF || ch == KEY_ENTER)
 			break;
+        else if(ch == KEY_CC && cancelable) {
+            canceled = TRUE;
+            break;
+        }
     }
     
     delwin(win);
+    return canceled ? -1 : curlen;
 }
 
-int scr_prompt_options(int width, char *text, char **options, int optcount) {
+int scr_prompt_options(BOOL cancelable, int width, char *text, char **options, int optcount) {
     erase();
     noecho();
-    cbreak();
+    raw();
     
     int ch, selected = 0, i, origin, maxlen = 0;
     short pair;
-    BOOL loop = TRUE;
+    BOOL loop = TRUE, canceled = FALSE;
     WINDOW *win;
     int text_height = calculate_height(width, text);
     
@@ -311,7 +379,7 @@ int scr_prompt_options(int width, char *text, char **options, int optcount) {
     attron(pair);
     
     attron(SCR_PAIR(SCR_WHITE, SCR_BLACK));
-    win = scr_win_box(1, (COLS - (width + 2)) / 2, width + 2, text_height + 3 + optcount);
+    win = scr_win_box(1, (COLS - (width + 2)) / 2, width + 2, text_height + 4 + optcount);
     attroff(SCR_PAIR(SCR_WHITE, SCR_BLACK));
     
     wattron(win, SCR_PAIR(SCR_WHITE, SCR_BLACK));
@@ -322,6 +390,12 @@ int scr_prompt_options(int width, char *text, char **options, int optcount) {
     for(i = 0; i < optcount; ++i)
         maxlen = MIN(width, MAX(maxlen, strlen(options[i]) + 3));
     origin = (width - maxlen) / 2;
+    
+    if(cancelable) {
+        attron(SCR_PAIR(SCR_BLACK, SCR_WHITE));
+        scr_center_write("PRESS ^C TO CANCEL", 0, text_height + 4 + optcount);
+        attroff(SCR_PAIR(SCR_BLACK, SCR_WHITE));
+    }
     
     while(loop) {
         for(i = 0; i < optcount; ++i) {
@@ -350,14 +424,18 @@ int scr_prompt_options(int width, char *text, char **options, int optcount) {
             case KEY_ENTER:
                 loop = FALSE;
                 break;
+            case KEY_CC:
+                if(cancelable)
+                    loop = !(canceled = TRUE);
+                break;
         }
     }
     
     delwin(win);
-    return selected;
+    return canceled ? -1 : selected;
 }
 
-int scr_prompt_voptions(int width, char *text, int optcount, ...) {
+int scr_prompt_voptions(BOOL cancelable, int width, char *text, int optcount, ...) {
 	int retval, i;
 	char **options = (char**)malloc(optcount * sizeof(char*));
 	
@@ -367,7 +445,7 @@ int scr_prompt_voptions(int width, char *text, int optcount, ...) {
 		options[i] = va_arg(args, char*);
 	va_end(args);
 	
-	retval = scr_prompt_options(width, text, options, optcount);
+	retval = scr_prompt_options(cancelable, width, text, options, optcount);
 	free(options);
 	return retval;
 }

@@ -33,10 +33,15 @@ void scr_center_write(char*, int, int);
 void scr_box(int, int, int, int);
 WINDOW* scr_win_box(int, int, int, int);
 
+void scr_loading(int, char*);
+void scr_loading_bar(int, char*);
+void scr_loading_bar_set(uint8_t);
+void scr_loading_bar_close();
+
 void scr_alert(int, char*);
-BOOL scr_prompt(int, char*);
-void scr_prompt_string(int, char*, char*, int);
-int scr_prompt_options(int, char*, char**, int); 
-int scr_prompt_voptions(int, char*, int, ...);
+BOOL scr_prompt(BOOL, int, char*);
+int scr_prompt_string(BOOL, int, char*, char*, int);
+int scr_prompt_options(BOOL, int, char*, char**, int); 
+int scr_prompt_voptions(BOOL, int, char*, int, ...);
 
 #endif

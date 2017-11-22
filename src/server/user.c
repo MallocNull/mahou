@@ -26,7 +26,29 @@ const char* _SKILL_NAMES_SHORT[] = {
     "COOK"
 };
 
-const char * OFINISH THESE GI
+const char* _STAT_NAMES[] = {
+    "Strength",
+    "Health",
+    "Defense",
+    "Agility",
+    "Intellect",
+    "Wisdom",
+    "Charisma",
+    "Perception",
+    "Luck"
+};
+
+const char* _STAT_NAMES_SHORT[] = {
+    "STR",
+    "HP",
+    "DEF",
+    "AGIL",
+    "INT",
+    "WIS",
+    "CHAR",
+    "PCPT",
+    "LUCK"
+};
 
 struct {
     pthread_mutex_t mx_ctx;
@@ -88,9 +110,9 @@ void user_context_purge() {
     user_t *ptr;
     list_iter_reset(ctx.pending_removals);
     while((ptr = list_iter_next(ctx.pending_removals)) != NULL) {
-        list_remove_item(ctx.active_users, user);
-        ctx.users[user->user_id] = NULL;
-        user_free(user);
+        list_remove_item(ctx.active_users, ptr);
+        ctx.users[ptr->user_id] = NULL;
+        user_free(ptr);
         list_iter_remove(ctx.pending_removals);
     }
     
@@ -132,10 +154,30 @@ BOOL user_check_flag(user_t *user, uint64_t flag) {
     return retval;
 }
 
-void user_push_in_packet(user_t *user) {
+void user_push_in_packet(user_t *user, packet_t *packet) {
     pthread_mutex_lock(&user->mx_user);
-    
+    queue_push(user->in_packets, packet);
     pthread_mutex_unlock(&user->mx_user);
+}
+
+void user_push_out_packet(user_t *user, packet_t *packet) {
+    pthread_mutex_lock(&user->mx_user);
+    queue_push(user->out_packets, packet);
+    pthread_mutex_unlock(&user->mx_user);
+}
+
+packet_t* user_pop_in_packet(user_t *user) {
+    pthread_mutex_lock(&user->mx_user);
+    packet_t *packet = queue_pop(user->in_packets);
+    pthread_mutex_unlock(&user->mx_user);
+    return packet;
+}
+
+packet_t* user_pop_out_packet(user_t *user) {
+    pthread_mutex_lock(&user->mx_user);
+    packet_t *packet = queue_pop(user->out_packets);
+    pthread_mutex_unlock(&user->mx_user);
+    return packet;
 }
 
 static void user_free(user_t *user) {
