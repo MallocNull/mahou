@@ -48,7 +48,7 @@ void client() {
         return;
     }
 
-	setlocale(LC_ALL, "");
+    setlocale(LC_ALL, "");
     initscr(); 
 
     start_color();
@@ -164,10 +164,10 @@ void create_account() {
     
     packet_free(pck);
     
-	char input[9];
+    char input[9];
     int a = //scr_prompt_string(TRUE, 20, "this prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test of a prompt box is a test", input, 8);
     scr_prompt_voptions(TRUE, 30, "I'm glad you know which way to go, but that ain't gunna stop me, here we go!\n \nCheck and turn the signals to the left.\n \nNow turn to the left.", 3,
-		"Now turn to the left!", "Now turn to the right!", "Uh oh");
+                        "Now turn to the left!", "Now turn to the right!", "Uh oh");
     
     for(;;);
 	

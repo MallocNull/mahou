@@ -1,55 +1,5 @@
 #include "user.h"
 
-const char* _SKILL_NAMES[] = {
-    "Melee",
-    "Ranged",
-    "White Magic",
-    "Black Magic",
-    "Woodcutting",
-    "Firemaking",
-    "Mining",
-    "Smithing",
-    "Fishing",
-    "Cooking"
-};
-
-const char* _SKILL_NAMES_SHORT[] = {
-    "MELE",
-    "RANG",
-    "WMAG",
-    "BMAG",
-    "WCUT",
-    "FIRE",
-    "MINE",
-    "SMTH",
-    "FISH",
-    "COOK"
-};
-
-const char* _STAT_NAMES[] = {
-    "Strength",
-    "Health",
-    "Defense",
-    "Agility",
-    "Intellect",
-    "Wisdom",
-    "Charisma",
-    "Perception",
-    "Luck"
-};
-
-const char* _STAT_NAMES_SHORT[] = {
-    "STR",
-    "HP",
-    "DEF",
-    "AGIL",
-    "INT",
-    "WIS",
-    "CHAR",
-    "PCPT",
-    "LUCK"
-};
-
 struct {
     pthread_mutex_t mx_ctx;
     list_t *active_users;
